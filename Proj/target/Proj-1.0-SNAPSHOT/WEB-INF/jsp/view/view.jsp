@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Customer Support</title>
+    <title>Online Course Website</title>
 </head>
 <body>
 <c:url var="logoutUrl" value="/cslogout"/>
@@ -11,10 +11,11 @@
 </form>
 
 <h2>Lecture #${LectureId}: <c:out value="${Lecture.lectureName}" /> </h2>
-<security:authorize access="hasRole('ADMIN')">
+
+<security:authorize access="hasAnyRole('ADMIN','LECTURER')">
     [<a href="<c:url value="/Lecture/edit/${LectureId}" />">Edit</a>]
 </security:authorize>
-<security:authorize access="hasRole('ADMIN')">
+<security:authorize access="hasAnyRole('ADMIN','LECTURER')">
     [<a href="<c:url value="/Lecture/delete/${LectureId}" />">Delete</a>]
 </security:authorize>
 <br /><br />

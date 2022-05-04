@@ -6,9 +6,11 @@
  * Author:  felix
  * Created: 2022年5月5日
  */
-DROP TABLE users;
-DROP TABLE userRole;
 DROP TABLE user_information;
+DROP TABLE userRole;
+DROP TABLE users;
+
+
 
 CREATE TABLE users (
     username VARCHAR(50) NOT NULL,
@@ -33,10 +35,10 @@ CREATE TABLE user_information (
 );
 
 INSERT INTO users VALUES ('admin', '{noop}admin');
-INSERT INTO user_roles(username, role) VALUES ('john', 'ROLE_ADMIN');
+INSERT INTO user_roles(username, role) VALUES ('admin', 'ROLE_ADMIN');
 
 INSERT INTO users VALUES ('lecturer', '{noop}lecturer');
-INSERT INTO user_roles(username, role) VALUES ('student', 'ROLE_LECTURER');
+INSERT INTO user_roles(username, role) VALUES ('lecturer', 'ROLE_LECTURER');
 
 INSERT INTO users VALUES ('user', '{noop}user');
 INSERT INTO user_roles(username, role) VALUES ('user', 'ROLE_USER');

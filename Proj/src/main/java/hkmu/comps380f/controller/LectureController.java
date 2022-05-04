@@ -2,12 +2,15 @@ package hkmu.comps380f.controller;
 
 import hkmu.comps380f.model.Attachment;
 import hkmu.comps380f.model.Lecture;
+import hkmu.comps380f.service.AttachmentService;
+import hkmu.comps380f.service.LectureService;
+import hkmu.comps380f.view.DownloadingView;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +25,30 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller
 @RequestMapping("/Lecture")
 public class LectureController {
+    
+    @Autowired
+    private LectureService lectureService;
+    
+    @Autowired
+    private AttachmentService attachmentService;
+
+    public LectureService getLectureService() {
+        return lectureService;
+    }
+
+    public void setLectureService(LectureService lectureService) {
+        this.lectureService = lectureService;
+    }
+
+    public AttachmentService getAttachmentService() {
+        return attachmentService;
+    }
+
+    public void setAttachmentService(AttachmentService attachmentService) {
+        this.attachmentService = attachmentService;
+    }
+    
+    
 
     private volatile long Lecture_ID_SEQUENCE = 1;
     private Map<Long, Lecture> LectureDatabase = new ConcurrentHashMap<>();
@@ -33,7 +60,6 @@ public class LectureController {
         return "list";
     }
 
-    
     @GetMapping("/create")
     public ModelAndView create() {
         return new ModelAndView("add", "LectureForm", new Form());
@@ -52,7 +78,6 @@ public class LectureController {
         public void setLectureName(String lectureName) {
             this.lectureName = lectureName;
         }
-
 
         public List<MultipartFile> getAttachments() {
             return attachments;
@@ -99,6 +124,22 @@ public class LectureController {
         return "view";
     }
 
+    @GetMapping("/delete/{LectureId}")
+    public View delete(@PathVariable("LectureId") long LectureId) {
+        Lecture deletedLecture = LectureDatabase.remove(LectureId);
+        return new RedirectView("/Lecture/list", true);
+    }
 
+    @GetMapping("/{LectureId}/attachment/{attachment:.+}")
+    public View download(@PathVariable("LectureId") long LectureId,
+            @PathVariable("attachment") String name) {
+        
+        Attachment attachment = attachmentService.getAttachment(LectureId, name);
+        if (attachment != null) {
+            return new DownloadingView(attachment.getName(),
+                    attachment.getMimeContentType(), attachment.getContents());
+        }
+        return new RedirectView("/Lecture/list", true);
+    }
 
 }

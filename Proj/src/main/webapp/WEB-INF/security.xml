@@ -25,13 +25,18 @@
 
     <http>
         <intercept-url pattern="/user/create" access="permitAll"/>
-        <intercept-url pattern="/Lecture/delete/**" access="hasRole('ADMIN')" /> 
-        <!--
-        <intercept-url pattern="/Lecture/list" access="hasAnyRole('USER','STUDENTS','LECTURER')" />
-            -->
-        <intercept-url pattern="/Lecture/create" access="hasAnyRole('LECTURER')" />
-        <intercept-url pattern="/Lecture/view/**" access="hasAnyRole('STUDENTS','LECTURER')" />
+        <intercept-url pattern="/user/list" access="hasRole('ADMIN')"/>
         
+        <intercept-url pattern="/Lecture/view/**" access="hasAnyRole('ADMIN','STUDENT','LECTURER')" />
+        <intercept-url pattern="/Lecture/create" access="hasAnyRole('ADMIN','LECTURER')" />
+        <intercept-url pattern="/Lecture/edit/**" access="hasAnyRole('ADMIN','LECTURER')" />
+        <intercept-url pattern="/Lecture/delete/**" access="hasAnyRole('ADMIN','LECTURER')" /> 
+        
+        <intercept-url pattern="/Lecture/{LectureId}/attachment/**" access="hasAnyRole('ADMIN','STUDENT','LECTURER')" /> 
+        
+        
+        
+            
         <form-login login-page="/cslogin" login-processing-url="/cslogin"
                     authentication-failure-url="/cslogin?error" />
         <logout logout-url="/cslogout" logout-success-url="/cslogin?logout"
@@ -39,6 +44,8 @@
         <remember-me key="usersDBSecret" token-validity-seconds="86400" />
     </http>
 
+    
+    
     <b:bean id="transactionManager" 
             class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <b:property name="dataSource" ref="dataSource" />
@@ -48,7 +55,9 @@
     <tx:annotation-driven transaction-manager="transactionManager" />
 
     <context:component-scan base-package="hkmu.comps380f.dao" />
-<authentication-manager>
-<authentication-provider user-service-ref="websiteUserService" />
-</authentication-manager>
+    <authentication-manager>
+        <authentication-provider user-service-ref="websiteUserService" />
+    </authentication-manager>
+    
+    
 </b:beans>

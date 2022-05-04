@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Customer Support Login</title>
+        <title>Online Course Website</title>
     </head>
     <body>
         <security:authorize access="hasAnyRole('USER','ADMIN')">

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Customer Support Login</title>
+        <title>Online Course Website Login</title>
     </head>
     <body>
         <c:if test="${param.error != null}">
@@ -11,7 +11,7 @@
             <p>You have logged out.</p>
         </c:if>
             ${param}
-        <h2>Customer Support Login</h2>
+        <h2>Online Course Website Login</h2>
         <form action="cslogin" method="POST">
             <label for="username">Username:</label><br/>
             <input type="text" id="username" name="username" /><br/><br/>
