@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +29,14 @@ import org.springframework.web.servlet.view.RedirectView;
 public class LectureController {
 
     private volatile long Lecture_ID_SEQUENCE = 1;
-    private Map<Long, Lecture> LectureDatabase = new ConcurrentHashMap<>();
+    private Map<Long, Lecture> LectureDatabase = new ConcurrentHashMap<>(); 
+    private final JdbcOperations jdbcOp;
+    
+    @Autowired
+    public LectureController(DataSource dataSource) {
+        jdbcOp = new JdbcTemplate(dataSource);
+    }
+
 
     // Controller methods, Form object, ...
     @GetMapping(value = {"", "/list"})
@@ -64,9 +75,11 @@ public class LectureController {
 
     @PostMapping("/create")
     public View create(Form form, Principal principal) throws IOException {
-        Lecture Lecture = new Lecture();
-        Lecture.setId(this.getNextLectureId());
-        Lecture.setLectureName(form.getLectureName());
+        String SQL_INSERT_MATERIAL
+                    = "insert into materials (lecture_id, content) values (?,?)";
+        Lecture lecture = new Lecture();
+        lecture.setId(this.getNextLectureId());
+        lecture.setLectureName(form.getLectureName());
 
         for (MultipartFile filePart : form.getAttachments()) {
             Attachment attachment = new Attachment();
@@ -75,11 +88,12 @@ public class LectureController {
             attachment.setContents(filePart.getBytes());
             if (attachment.getName() != null && attachment.getName().length() > 0
                     && attachment.getContents() != null && attachment.getContents().length > 0) {
-                Lecture.addAttachment(attachment);
+                lecture.addAttachment(attachment);
+                jdbcOp.update(SQL_INSERT_MATERIAL, lecture.getId(), filePart.getBytes());
             }
         }
-        this.LectureDatabase.put(Lecture.getId(), Lecture);
-        return new RedirectView("/Lecture/view/" + Lecture.getId(), true);
+        this.LectureDatabase.put(lecture.getId(), lecture);
+        return new RedirectView("/Lecture/view/" + lecture.getId(), true);
     }
 
     private synchronized long getNextLectureId() {
@@ -117,12 +131,17 @@ public class LectureController {
     @PostMapping("/edit/{LectureId}")
     public String edit(@PathVariable("LectureId") long LectureId, Form form,
             Principal principal, HttpServletRequest request) throws IOException{
+        String SQL_DROP_MATERIAL
+                    = "delete from materials where lecture_id = ?";
+        String SQL_INSERT_MATERIAL
+                    = "insert into materials (lecture_id, content) values (?,?)";
          Lecture lecture = this.LectureDatabase.get(LectureId);
         if (lecture == null) {
             return "redirect:/lecture/list";
         }
         
         lecture.setLectureName(form.getLectureName());
+        jdbcOp.update(SQL_DROP_MATERIAL, lecture.getId());
         
         for (MultipartFile filePart : form.getAttachments()) {
             Attachment attachment = new Attachment();
@@ -133,6 +152,7 @@ public class LectureController {
                     && attachment.getContents() != null
                     && attachment.getContents().length > 0) {
                 lecture.addAttachment(attachment);
+                jdbcOp.update(SQL_INSERT_MATERIAL, lecture.getId(), filePart.getBytes());
             }
         }
         
@@ -141,6 +161,9 @@ public class LectureController {
 
     @GetMapping("/delete/{LectureId}")
     public View delete(@PathVariable("LectureId") long LectureId) {
+        String SQL_DELETE_MATERIAL
+                    = "delete from materials where lecture_id = ?";
+        jdbcOp.update(SQL_DELETE_MATERIAL, LectureId);
         Lecture deletedLecture = LectureDatabase.remove(LectureId);
         return new RedirectView("/Lecture/list", true);
     }

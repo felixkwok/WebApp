@@ -9,7 +9,7 @@
 DROP TABLE user_information;
 DROP TABLE userRole;
 DROP TABLE users;
-
+DROP TABLE materials;
 
 
 CREATE TABLE users (
@@ -32,6 +32,12 @@ CREATE TABLE user_information (
     fullname VARCHAR(50) NOT NULL, 
     phone VARCHAR(50) NOT NULL, 
     address VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE materials (
+    material_id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+    lecture_id INTEGER NOT NULL,
+    content BLOB
 );
 
 INSERT INTO users VALUES ('admin', '{noop}admin');
