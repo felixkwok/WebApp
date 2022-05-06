@@ -12,7 +12,7 @@
 
         <h2>Create a Lecture</h2>
         <form:form method="POST" enctype="multipart/form-data"
-                   modelAttribute="LectureForm">
+                   modelAttribute="lectureForm">
             <form:label path="LectureName">Subject</form:label><br />
             <form:input type="text" path="LectureName" /><br /><br />
             <b>Attachments</b><br />

@@ -34,9 +34,6 @@
         
         <intercept-url pattern="/Lecture/{LectureId}/attachment/**" access="hasAnyRole('ADMIN','STUDENT','LECTURER')" /> 
         
-        
-        
-            
         <form-login login-page="/cslogin" login-processing-url="/cslogin"
                     authentication-failure-url="/cslogin?error" />
         <logout logout-url="/cslogout" logout-success-url="/cslogin?logout"
@@ -44,8 +41,6 @@
         <remember-me key="usersDBSecret" token-validity-seconds="86400" />
     </http>
 
-    
-    
     <b:bean id="transactionManager" 
             class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <b:property name="dataSource" ref="dataSource" />
@@ -55,8 +50,8 @@
     <tx:annotation-driven transaction-manager="transactionManager" />
 
     <context:component-scan base-package="hkmu.comps380f.dao" />
-
-   
-    
-    
+    <authentication-manager>
+        <authentication-provider user-service-ref="websiteUserService" />
+    </authentication-manager>
 </b:beans>
+   

@@ -6,7 +6,7 @@
         <title>Online Course Website</title>
     </head>
     <body>
-        <security:authorize access="hasAnyRole('USER','ADMIN')">
+        <security:authorize access="hasAnyRole('USER','ADMIN','LECTURER')">
         <c:url var="logoutUrl" value="/cslogout"/>
         <form action="${logoutUrl}" method="post">
             <input type="submit" value="Log out" />
