@@ -10,6 +10,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,8 @@ import org.springframework.web.servlet.view.RedirectView;
 public class LectureController {
 
     private volatile long Lecture_ID_SEQUENCE = 1;
-    private Map<Long, Lecture> LectureDatabase = new ConcurrentHashMap<>();
+    @Resource
+    public Map<Long, Lecture> LectureDatabase = new ConcurrentHashMap<>();
     private final JdbcOperations jdbcOp;
 
     @Autowired
@@ -193,7 +195,10 @@ public class LectureController {
     public View delete(@PathVariable("LectureId") long LectureId) {
         String SQL_DELETE_MATERIAL
                 = "delete from materials where lecture_id = ?";
+        String SQL_DELETE_LECTURE
+                = "delete from lectures where lecture_id = ?";
         jdbcOp.update(SQL_DELETE_MATERIAL, LectureId);
+        jdbcOp.update(SQL_DELETE_LECTURE, LectureId);
         Lecture deletedLecture = LectureDatabase.remove(LectureId);
         return new RedirectView("/Lecture/list", true);
     }
