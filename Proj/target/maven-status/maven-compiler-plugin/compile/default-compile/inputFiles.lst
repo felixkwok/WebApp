@@ -1,8 +1,10 @@
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\controller\IndexController.java
+C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\dao\lectureRowMapper.java
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\model\Attachment.java
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\dao\WebsiteUserRepositoryImpl.java
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\controller\WebsiteUserController.java
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\controller\LectureController.java
+C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\dao\attachmentRowMapper.java
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\model\WebsiteUser.java
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\model\Lecture.java
 C:\Users\felix\Desktop\WebApp\Proj\src\main\java\hkmu\comps380f\view\DownloadingView.java

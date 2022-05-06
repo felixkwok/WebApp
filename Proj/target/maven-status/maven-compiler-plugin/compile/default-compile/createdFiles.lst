@@ -1,6 +1,7 @@
 hkmu\comps380f\dao\WebsiteUserRepositoryImpl$1.class
 hkmu\comps380f\model\WebsiteUser.class
 hkmu\comps380f\controller\WebsiteUserController.class
+hkmu\comps380f\dao\attachmentRowMapper.class
 hkmu\comps380f\controller\LectureController.class
 hkmu\comps380f\controller\WebsiteUserController$Form.class
 hkmu\comps380f\view\DownloadingView.class
@@ -12,3 +13,4 @@ hkmu\comps380f\dao\WebsiteUserRepository.class
 hkmu\comps380f\controller\IndexController.class
 hkmu\comps380f\dao\WebsiteUserRepositoryImpl$UserExtractor.class
 hkmu\comps380f\controller\LectureController$Form.class
+hkmu\comps380f\dao\lectureRowMapper.class

@@ -1,5 +1,7 @@
 package hkmu.comps380f.controller;
 
+import hkmu.comps380f.dao.attachmentRowMapper;
+import hkmu.comps380f.dao.lectureRowMapper;
 import hkmu.comps380f.model.Attachment;
 import hkmu.comps380f.model.Lecture;
 import hkmu.comps380f.view.DownloadingView;
@@ -29,18 +31,38 @@ import org.springframework.web.servlet.view.RedirectView;
 public class LectureController {
 
     private volatile long Lecture_ID_SEQUENCE = 1;
-    private Map<Long, Lecture> LectureDatabase = new ConcurrentHashMap<>(); 
+    private Map<Long, Lecture> LectureDatabase = new ConcurrentHashMap<>();
     private final JdbcOperations jdbcOp;
-    
+
     @Autowired
     public LectureController(DataSource dataSource) {
         jdbcOp = new JdbcTemplate(dataSource);
     }
 
-
     // Controller methods, Form object, ...
     @GetMapping(value = {"", "/list"})
     public String list(ModelMap model) {
+        String SQL_LIST_LECTURE
+                = "select lecture_name from lectures";
+        String SQL_LIST_MATERIALS
+                = "select l.lecture_name, m.file_name, m.content\n"
+                + "from lectures l\n"
+                + "right join materials m ON l.LECTURE_ID = m.LECTURE_ID\n"
+                + "order by l.LECTURE_ID";
+        List<String> lectureName = jdbcOp.query(SQL_LIST_LECTURE, new lectureRowMapper());
+        List<Attachment> attachmentList = jdbcOp.query(SQL_LIST_MATERIALS, new attachmentRowMapper());
+        for (String name : lectureName) {
+            Lecture lecture = new Lecture();
+            lecture.setId(Lecture_ID_SEQUENCE);
+            lecture.setLectureName(name);
+
+            for (Attachment attachment : attachmentList) {
+                lecture.addAttachment(attachment);
+            }
+
+            LectureDatabase.put(Lecture_ID_SEQUENCE, lecture);
+            Lecture_ID_SEQUENCE++;
+        }
         model.addAttribute("LectureDatabase", LectureDatabase);
         return "list";
     }
@@ -75,11 +97,14 @@ public class LectureController {
 
     @PostMapping("/create")
     public View create(Form form, Principal principal) throws IOException {
+        String SQL_INSERT_LECTURE
+                = "insert into lectures (lecture_name) values (?)";
         String SQL_INSERT_MATERIAL
-                    = "insert into materials (lecture_id, content) values (?,?)";
+                = "insert into materials (lecture_id, file_name, content) values (?,?,?)";
         Lecture lecture = new Lecture();
         lecture.setId(this.getNextLectureId());
         lecture.setLectureName(form.getLectureName());
+        jdbcOp.update(SQL_INSERT_LECTURE, form.getLectureName());
 
         for (MultipartFile filePart : form.getAttachments()) {
             Attachment attachment = new Attachment();
@@ -89,7 +114,7 @@ public class LectureController {
             if (attachment.getName() != null && attachment.getName().length() > 0
                     && attachment.getContents() != null && attachment.getContents().length > 0) {
                 lecture.addAttachment(attachment);
-                jdbcOp.update(SQL_INSERT_MATERIAL, lecture.getId(), filePart.getBytes());
+                jdbcOp.update(SQL_INSERT_MATERIAL, lecture.getId(), filePart.getOriginalFilename(), filePart.getBytes());
             }
         }
         this.LectureDatabase.put(lecture.getId(), lecture);
@@ -111,38 +136,43 @@ public class LectureController {
         model.addAttribute("Lecture", lecture);
         return "view";
     }
-    
+
     @GetMapping("/edit/{LectureId}")
     public ModelAndView showEdit(@PathVariable("LectureId") long LectureId,
             Principal principal, HttpServletRequest request) {
-         Lecture lecture = this.LectureDatabase.get(LectureId);
-        if (lecture == null){
+
+        Lecture lecture = this.LectureDatabase.get(LectureId);
+        if (lecture == null) {
             return new ModelAndView(new RedirectView("/Lecture/list", true));
         }
+
         ModelAndView modelAndView = new ModelAndView("edit");
         modelAndView.addObject("lecture", lecture);
         Form lectureForm = new Form();
         lectureForm.setLectureName(lecture.getLectureName());
-        
+
         modelAndView.addObject("lectureForm", lectureForm);
         return modelAndView;
     }
-    
+
     @PostMapping("/edit/{LectureId}")
     public String edit(@PathVariable("LectureId") long LectureId, Form form,
-            Principal principal, HttpServletRequest request) throws IOException{
+            Principal principal, HttpServletRequest request) throws IOException {
+        String SQL_EDIT_LECTURE
+                = "update lectures set lecture_name = ? where lecture_id = ?";
         String SQL_DROP_MATERIAL
-                    = "delete from materials where lecture_id = ?";
+                = "delete from materials where lecture_id = ?";
         String SQL_INSERT_MATERIAL
-                    = "insert into materials (lecture_id, content) values (?,?)";
-         Lecture lecture = this.LectureDatabase.get(LectureId);
+                = "insert into materials (lecture_id, content) values (?,?)";
+        Lecture lecture = this.LectureDatabase.get(LectureId);
         if (lecture == null) {
             return "redirect:/lecture/list";
         }
-        
+
         lecture.setLectureName(form.getLectureName());
         jdbcOp.update(SQL_DROP_MATERIAL, lecture.getId());
-        
+        jdbcOp.update(SQL_EDIT_LECTURE, lecture.getLectureName(), lecture.getId());
+
         for (MultipartFile filePart : form.getAttachments()) {
             Attachment attachment = new Attachment();
             attachment.setName(filePart.getOriginalFilename());
@@ -155,19 +185,19 @@ public class LectureController {
                 jdbcOp.update(SQL_INSERT_MATERIAL, lecture.getId(), filePart.getBytes());
             }
         }
-        
+
         return "redirect:/Lecture/view/" + LectureId;
     }
 
     @GetMapping("/delete/{LectureId}")
     public View delete(@PathVariable("LectureId") long LectureId) {
         String SQL_DELETE_MATERIAL
-                    = "delete from materials where lecture_id = ?";
+                = "delete from materials where lecture_id = ?";
         jdbcOp.update(SQL_DELETE_MATERIAL, LectureId);
         Lecture deletedLecture = LectureDatabase.remove(LectureId);
         return new RedirectView("/Lecture/list", true);
     }
-    
+
     @GetMapping("/{LectureId}/attachment/{attachment:.+}")
     public View download(@PathVariable("LectureId") long LectureId,
             @PathVariable("attachment") String name) {
